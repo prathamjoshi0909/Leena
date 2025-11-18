@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Leena Scheduler</title>
+  <style>
+    /* --- visual styles & animations restored --- */
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: linear-gradient(135deg,#ffeef8 0%, #e0f2ff 50%, #f0e7ff 100%);
+      min-height: 100vh;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    * { box-sizing: border-box; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; position:relative; z-index:5; }
+
+    .hero {
+      text-align:center;
+      padding:60px 20px;
+      background:linear-gradient(135deg,#ffd6f0 0%, #c6b5ff 100%);
+      border-radius:30px;
+      margin-bottom:40px;
+      box-shadow:0 20px 60px rgba(255,105,180,0.18);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero::before {
+      content:'✨';
+      position:absolute;
+      font-size:60px;
+      top:20px;
+      left:40px;
+      animation:sparkle 3s infinite;
+      opacity:0.9;
+      pointer-events:none;
+    }
+    .hero::after {
+      content:'💕';
+      position:absolute;
+      font-size:50px;
+      bottom:30px;
+      right:40px;
+      animation:float 4s infinite;
+      pointer-events:none;
+    }
+    @keyframes sparkle {
+      0%,100%{ transform:rotate(0deg) scale(1); opacity:.7 }
+      50%{ transform:rotate(180deg) scale(1.15); opacity:1 }
+    }
+    @keyframes float {
+      0%,100%{ transform:translateY(0) }
+      50%{ transform:translateY(-18px) }
+    }
+
+    .hero-title { font-size:42px; font-weight:800; color:#ff1493; margin:0 0 12px 0; text-shadow:2px 2px 0 rgba(255,255,255,0.5); }
+    .hero-subtitle { font-size:18px; color:#7b3ff2; margin:0 0 20px 0; font-weight:500; }
+
+    .illustration { width:320px; height:320px; margin:18px auto 0; position:relative; pointer-events:none; }
+    .phone-frame {
+      width:180px; height:320px; border-radius:34px;
+      margin:0 auto; padding:16px;
+      background:linear-gradient(135deg,#667eea 0%, #764ba2 100%);
+      box-shadow:0 12px 46px rgba(102,126,234,0.36);
+      position:relative;
+      animation:phoneWiggle 2.2s infinite ease-in-out;
+    }
+    @keyframes phoneWiggle { 0%,100%{ transform:rotate(-2deg) } 50%{ transform:rotate(2deg) } }
+
+    .phone-screen {
+      width:100%; height:100%; background:white; border-radius:20px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:44px;
+    }
+
+    .instagram-icon {
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:28px;
+      opacity:0.95;
+      animation:scrollReels 3s linear infinite;
+      pointer-events:none;
+    }
+    .instagram-icon.i1 { animation-delay:0s; top:-40px; }
+    .instagram-icon.i2 { animation-delay:1s; top:-80px; }
+    .instagram-icon.i3 { animation-delay:2s; top:-120px; }
+    @keyframes scrollReels {
+      0% { transform: translate(-50%, -40px) scale(0.95); opacity:0.9; }
+      40% { opacity:1; transform: translate(-50%, 40px) scale(1.02); }
+      80% { opacity:0.7; transform: translate(-50%, 220px) scale(0.9); }
+      100% { transform: translate(-50%, 340px) scale(0.8); opacity:0; }
+    }
+
+    .card { background:white; border-radius:25px; padding:40px; margin-bottom:30px; box-shadow:0 10px 40px rgba(255,105,180,0.12); position:relative; z-index:10; }
+    .card-title { font-size:28px; font-weight:700; color:#ff1493; margin:0 0 20px 0; display:flex; align-items:center; gap:10px; }
+
+    .form-group { margin-bottom:25px; }
+    label { display:block; font-weight:600; color:#7b3ff2; margin-bottom:8px; font-size:16px; }
+    input[type="text"], input[type="datetime-local"], select { width:100%; padding:14px 18px; border:3px solid #ffd6f0; border-radius:14px; font-size:15px; background:#fff; }
+    input:focus, select:focus { outline:none; border-color:#ff69b4; box-shadow:0 0 0 4px rgba(255,105,180,0.08); }
+
+    .mood-pills { display:flex; gap:10px; flex-wrap:wrap; }
+    .mood-pill {
+      padding:12px 20px; border:3px solid #ffd6f0; border-radius:22px; background:white;
+      cursor:pointer; font-weight:700; transition:all .12s; font-size:14px; user-select:none;
+      box-shadow:0 2px 8px rgba(0,0,0,0.02);
+      position:relative; z-index:20;
+    }
+    .mood-pill:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(123,63,242,0.06); }
+    .mood-pill.active { background:linear-gradient(135deg,#ff69b4 0%,#ff1493 100%); color:white; border-color:#ff1493; }
+
+    .preview-box { background:linear-gradient(135deg,#ffeef8 0%, #f0e7ff 100%); border-radius:20px; padding:24px; border:3px dashed #ff69b4; margin-top:20px; position:relative; }
+    .preview-text { font-size:18px; color:#7b3ff2; line-height:1.6; font-weight:500; white-space:pre-wrap; }
+
+    .loading-bar-container { width:100%; height:30px; background:#ffd6f0; border-radius:15px; overflow:hidden; margin:20px 0; position:relative; }
+    .loading-bar { height:100%; background:linear-gradient(90deg,#ff69b4,#ff1493,#c71585); width:0%; border-radius:15px; animation:loading 3s infinite; position:relative; }
+    @keyframes loading { 0%{ width:0% } 50%{ width:100% } 100%{ width:0% } }
+    .loading-bar::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent); animation:shimmer 1s infinite; }
+    @keyframes shimmer { 0%{ transform:translateX(-100%) } 100%{ transform:translateX(100%) } }
+
+    .controls-row { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+    .btn { padding:10px 14px; border-radius:10px; border:none; cursor:pointer; font-weight:700; background:#ff1493; color:white; }
+    .btn.ghost { background:transparent; border:2px solid #ffd6f0; color:#7b3ff2; font-weight:700; }
+    .btn.secondary { background:#7b3ff2; color:white; }
+
+    footer { text-align:center; padding:40px 20px; color:#7b3ff2; font-size:16px; font-weight:500; }
+
+    @media (max-width:768px) {
+      .hero-title{ font-size:32px } .hero-subtitle{ font-size:15px } .card{ padding:24px } .illustration{ width:260px; height:260px; } .phone-frame{ width:150px; height:260px }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero" aria-hidden="false">
+      <h1 class="hero-title" id="main-title">Leena Scheduler – For people who have time for Instagram but not replies 😂</h1>
+      <p class="hero-subtitle" id="subtitle">Book a time slot in Leena's elite schedule.</p>
+
+      <!-- illustration restored with scrolling icons -->
+      <div class="illustration" aria-hidden="true">
+        <div class="phone-frame" role="img" aria-label="phone with reels animation">
+          <div class="phone-screen">
+            <div class="instagram-icon i1">📸</div>
+            <div class="instagram-icon i2">🎥</div>
+            <div class="instagram-icon i3">❤️</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">📅 Schedule Your Appointment</h2>
+
+      <div class="form-group">
+        <label for="sender" id="sender-label">Your Name (Obviously it's Pratham 😏)</label>
+        <input type="text" id="sender" value="Pratham" />
+      </div>
+
+      <div class="form-group">
+        <label for="recipient" id="recipient-label">Recipient Name (The Queen 👑)</label>
+        <input type="text" id="recipient" value="Leena" />
+      </div>
+
+      <div class="form-group">
+        <label for="datetime">Choose Date & Time ⏰</label>
+        <input type="datetime-local" id="datetime" />
+      </div>
+
+      <div class="form-group">
+        <label>Select Message Tone 💬</label>
+        <div class="mood-pills" id="toneGroup">
+          <button type="button" class="mood-pill active" data-tone="cute">🥰 Cute</button>
+          <button type="button" class="mood-pill" data-tone="funny">😂 Funny</button>
+          <button type="button" class="mood-pill" data-tone="sarcastic">😏 Sarcastic</button>
+          <button type="button" class="mood-pill" data-tone="formal">🤵 Formal</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Current Mood Selector 🎭</label>
+        <div class="mood-pills" id="moodGroup">
+          <button type="button" class="mood-pill active" data-mood="instagram">📱 Instagram Mode</button>
+          <button type="button" class="mood-pill" data-mood="nice">😊 Nice</button>
+          <button type="button" class="mood-pill" data-mood="urgent">🚨 Urgent</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">🤖 AI Message Generator Preview</h2>
+
+      <div class="preview-box">
+        <p class="preview-text" id="message-preview">Hi Leena, this is Pratham. I was thinking about you at <span id="current-time"></span>. When you get time after Instagram, WSP? 😄</p>
+
+        <div class="controls-row" style="margin-top:12px;">
+          <button id="generateBtn" type="button" class="btn">Generate Final Message</button>
+          <button id="copyBtn" type="button" class="btn ghost">Copy Final Message</button>
+          <button id="refreshPreview" type="button" class="btn secondary">Refresh Preview</button>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label style="font-weight:700; color:#7b3ff2; margin-bottom:6px; display:block;">Final Message</label>
+          <div class="preview-box" style="padding:14px; border-radius:12px;">
+            <div id="final-output" class="preview-text">(Click "Generate Final Message" to build the final message including name & scheduled time.)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">📊 Instagram Activity Tracker</h2>
+      <div class="tracker">
+        <div class="loading-bar-container"><div class="loading-bar" aria-hidden="true"></div></div>
+        <p class="tracker-status" id="tracker-status">Checking if Leena is scrolling reels... 📱</p>
+        <div class="chance-indicator" style="font-size:40px;font-weight:800; background:linear-gradient(135deg,#ff69b4 0%,#c71585 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Chance she will reply: 3%....  thats quite low pratham</div>
+        <p style="font-size:14px;color:#999;margin-top:20px;">Last seen: Active on Instagram 2 minutes ago 👀</p>
+        <br> <br>
+        <p style="font-size:30px;color:#000000;margin-top:20px;">Still we have added a DM button here so that she can directly visit your insta DM's</p>
+        <center> <h2 button id="generateBtn" type="button" class="btn">Click here to Direct Jump to Pratham's instagram chat</button>
+       </center> </h2>
+      
+      </div>
+    </div>
+  </div>
+
+  <footer id="footer-text">Made with ❤️ by Pratham for fun. No real messages are sent.</footer>
+
+  <script>
+    /* Keep JS wrapped so everything is set up after DOM loads */
+    document.addEventListener('DOMContentLoaded', function() {
+
+      // --------------- MESSAGE GENERATION TREE (12 combos) ---------------
+      function getGeneratedMessage(tone, mood, sender, recipient) {
+        sender = sender || '{sender}';
+        recipient = recipient || '{recipient}';
+
+        if (tone === 'cute' && mood === 'instagram') {
+          return `Hi ${recipient} 💕 — it's ${sender}. I know you're mid-scroll, but I saw something and it made me think of you. Ping me when you finish your reels?`;
+        } else if (tone === 'cute' && mood === 'nice') {
+          return `Hey ${recipient} 😊 — just wanted to say hi and send you a little smile. No rush, reply whenever you're free.`;
+        } else if (tone === 'cute' && mood === 'urgent') {
+          return `Hi ${recipient} 💌 — it's ${sender}. Sorry to bug you, but something came up and I need a quick reply when you can.`;
+        }
+
+        else if (tone === 'funny' && mood === 'instagram') {
+          return `Yo ${recipient} 😂 — interrupting your IG feed: it's ${sender}. If you ignore this, I will assume you accepted the role of Chief Reel Curator. Reply?`;
+        } else if (tone === 'funny' && mood === 'nice') {
+          return `Hey ${recipient} 😄 — ${sender} here. Just checking in with a friendly meme-free hello (for now). Hope you're good!`;
+        } else if (tone === 'funny' && mood === 'urgent') {
+          return `Hey ${recipient} 🤪 — serious-ish heads up from ${sender}: need a fast yes/no. Please answer before I send a thousand gifs.`;
+        }
+
+        else if (tone === 'sarcastic' && mood === 'instagram') {
+          return `Oh look — ${recipient} is scrolling the whole internet again. Lucky for you it's ${sender} making a rare appearance. Drop a reply when you resurface. 😉`;
+        } else if (tone === 'sarcastic' && mood === 'nice') {
+          return `Hi ${recipient}. I know you're very busy being amazing, but if you ever have a second, ${sender} would appreciate a tiny reply. No pressure.`;
+        } else if (tone === 'sarcastic' && mood === 'urgent') {
+          return `Hey ${recipient} — love that you're living your best life. Meanwhile, ${sender} actually needs a reply. ASAP would be great (yes, really).`;
+        }
+
+        else if (tone === 'formal' && mood === 'instagram') {
+          return `Hello ${recipient}, this is ${sender}. I note you are active on Instagram; when convenient, could you please respond at your earliest? Thank you.`;
+        } else if (tone === 'formal' && mood === 'nice') {
+          return `Dear ${recipient}, I hope you're well. This is ${sender} — whenever you have a moment, kindly let me know a suitable time to talk.`;
+        } else if (tone === 'formal' && mood === 'urgent') {
+          return `Hello ${recipient}, ${sender} here. Apologies for the urgency, but I would be grateful for a prompt response regarding a time-sensitive matter.`;
+        }
+
+        return `Hi ${recipient}, this is ${sender}.`;
+      }
+
+      // --------------- UTIL HELPERS ---------------
+      function updateMessagePreviewFromPills() {
+        const toneBtn = document.querySelector('#toneGroup .mood-pill.active');
+        const moodBtn = document.querySelector('#moodGroup .mood-pill.active');
+        const tone = toneBtn ? toneBtn.getAttribute('data-tone') : 'cute';
+        const mood = moodBtn ? moodBtn.getAttribute('data-mood') : 'instagram';
+        const sender = document.getElementById('sender').value || 'Pratham';
+        const recipient = document.getElementById('recipient').value || 'Leena';
+        const msg = getGeneratedMessage(tone, mood, sender, recipient);
+        const previewEl = document.getElementById('message-preview');
+        if (previewEl) previewEl.textContent = msg;
+      }
+
+      function formatDateTimeForDisplay(isoString) {
+        if (!isoString) return '';
+        const d = new Date(isoString);
+        if (isNaN(d.getTime())) return isoString;
+        return d.toLocaleString(undefined, {
+          month:'long', day:'numeric', year:'numeric',
+          hour:'numeric', minute:'2-digit', hour12:true
+        });
+      }
+
+      // --------------- PILL HANDLERS (pointerdown for reliability) ---------------
+      function attachPillHandlers(groupSelector) {
+        const group = document.querySelector(groupSelector);
+        if (!group) return;
+        group.querySelectorAll('.mood-pill').forEach(pill => {
+          pill.setAttribute('type','button');
+          pill.addEventListener('pointerdown', function(ev) {
+            ev.preventDefault();
+            group.querySelectorAll('.mood-pill').forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            updateMessagePreviewFromPills();
+          }, { passive:false });
+          pill.addEventListener('keydown', function(e){
+            if (e.key === ' ' || e.key === 'Enter') {
+              e.preventDefault();
+              this.click();
+            }
+          });
+        });
+      }
+      attachPillHandlers('#toneGroup');
+      attachPillHandlers('#moodGroup');
+
+      // keep preview synced with name inputs
+      const senderEl = document.getElementById('sender');
+      const recipientEl = document.getElementById('recipient');
+      senderEl.addEventListener('input', updateMessagePreviewFromPills);
+      recipientEl.addEventListener('input', updateMessagePreviewFromPills);
+
+      // --------------- GENERATE & COPY ---------------
+      let lastFinal = '';
+      function generateFinalMessage() {
+        const toneBtn = document.querySelector('#toneGroup .mood-pill.active');
+        const moodBtn = document.querySelector('#moodGroup .mood-pill.active');
+        const tone = toneBtn ? toneBtn.getAttribute('data-tone') : 'cute';
+        const mood = moodBtn ? moodBtn.getAttribute('data-mood') : 'instagram';
+        const sender = senderEl.value || 'Pratham';
+        const recipient = recipientEl.value || 'Leena';
+        const dto = document.getElementById('datetime').value || '';
+        const dtoDisplay = formatDateTimeForDisplay(dto);
+        const body = getGeneratedMessage(tone, mood, sender, recipient);
+        const header = `${sender} → ${recipient}${dtoDisplay ? `\nScheduled: ${dtoDisplay}` : ''}`;
+        const final = `${header}\n\n${body}`;
+        document.getElementById('final-output').textContent = final;
+        document.getElementById('message-preview').textContent = body;
+        lastFinal = final;
+        flashTemp('Final message generated');
+        return final;
+      }
+
+      async function copyFinal() {
+        const text = lastFinal || generateFinalMessage();
+        try {
+          await navigator.clipboard.writeText(text);
+          flashTemp('Final message copied to clipboard ✓');
+        } catch (err) {
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); flashTemp('Copied (fallback)'); } catch (e) { alert('Copy failed — select & copy manually.'); }
+          ta.remove();
+        }
+      }
+
+      // small visual flash
+      function flashTemp(msg, t=1200) {
+        const el = document.createElement('div');
+        el.textContent = msg;
+        el.style.position='fixed'; el.style.left='50%'; el.style.top='16px';
+        el.style.transform='translateX(-50%)';
+        el.style.background='#111'; el.style.color='white'; el.style.padding='8px 12px';
+        el.style.borderRadius='8px'; el.style.zIndex='999999'; el.style.opacity='0.98';
+        document.body.appendChild(el);
+        setTimeout(()=> el.style.opacity='0', t-200);
+        setTimeout(()=> el.remove(), t);
+      }
+
+      // wire buttons
+      document.getElementById('generateBtn').addEventListener('click', generateFinalMessage);
+      document.getElementById('copyBtn').addEventListener('click', copyFinal);
+      document.getElementById('refreshPreview').addEventListener('click', updateMessagePreviewFromPills);
+
+      // set default datetime to local now
+      (function setDefaultDatetime(){
+        const dt = document.getElementById('datetime');
+        const n = new Date(); n.setMinutes(n.getMinutes() - n.getTimezoneOffset());
+        dt.value = n.toISOString().slice(0,16);
+      })();
+
+      // initial preview update
+      updateMessagePreviewFromPills();
+
+      // rotate fake tracker statuses
+      const statusMessages = [
+        "Checking if Leena is scrolling reels... 📱",
+        "Analyzing Instagram story views... 👀",
+        "Detecting double-tap activity... ❤️",
+        "Calculating response probability... 🧮",
+        "Monitoring DM read receipts... ✉️"
+      ];
+      let statusIndex=0;
+      setInterval(()=> {
+        statusIndex = (statusIndex + 1) % statusMessages.length;
+        const el = document.getElementById('tracker-status');
+        if (el) el.textContent = statusMessages[statusIndex];
+      }, 3000);
+
+      // live current-time inside preview
+      function updateTime(){
+        const now = new Date();
+        const formatted = now.toLocaleString(undefined, { month:'long', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit', hour12:true });
+        const el = document.getElementById('current-time');
+        if (el) el.textContent = formatted;
+      }
+      updateTime(); setInterval(updateTime, 60000);
+
+    }); // DOMContentLoaded
+  </script>
+</body>
+</html>
