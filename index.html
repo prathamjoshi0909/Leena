@@ -221,8 +221,12 @@
         <p style="font-size:14px;color:#999;margin-top:20px;">Last seen: Active on Instagram 2 minutes ago 👀</p>
         <br> <br>
         <p style="font-size:30px;color:#000000;margin-top:20px;">Still we have added a DM button here so that she can directly visit your insta DM's</p>
-        <center> <h2 button id="generateBtn" type="button" class="btn">Click here to Direct Jump to Pratham's instagram chat</button>
-       </center> </h2>
+        <center> <h2 button id="instaDirectBtn" type="button" class="btn">
+          Click here to Direct Jump to Pratham's Instagram chat
+      </button>
+      
+      
+          </center> </h2>
       
       </div>
     </div>
@@ -231,6 +235,9 @@
   <footer id="footer-text">Made with ❤️ by Pratham for fun. No real messages are sent.</footer>
 
   <script>
+    document.getElementById("instaDirectBtn").addEventListener("click", function() {
+      window.open("https://www.instagram.com/direct/t/113364570060080/", "_blank");
+      });
     /* Keep JS wrapped so everything is set up after DOM loads */
     document.addEventListener('DOMContentLoaded', function() {
 
